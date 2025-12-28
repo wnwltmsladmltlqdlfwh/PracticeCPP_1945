@@ -30,3 +30,16 @@
 *.exe
 *.out
 *.app
+
+# Visual Studio cache
+.vs/
+
+# Build outputs
+x64/
+Debug/
+Release/
+*.obj
+*.pch
+*.pdb
+*.ilk
+*.exe
