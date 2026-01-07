@@ -9,6 +9,7 @@
 #include "SphereCollider.h"
 #include "EnemySpawner_TypeA.h"
 #include "EnemySpawner_TypeB.h"
+#include "BulletPool.h"
 
 Enemy_Normal::Enemy_Normal()
 {
@@ -94,7 +95,7 @@ void Enemy_Normal::ShootAtTarget()
 	Vec2 dir = _targetPos - _pos;
 	dir.Normalize();
 
-	Bullet* bullet = new Bullet(this, _damage);
+	Bullet* bullet = GET_SINGLE(BulletPool)->Acquire(this, _damage);
 	bullet->SetPos(_pos + Vec2{ 0, 30 });
 	bullet->SetDirection(dir);
 	bullet->SetSpeed(200.f);
@@ -104,11 +105,6 @@ void Enemy_Normal::ShootAtTarget()
 	collider->SetRadius(6.f);
 	bullet->AddComponent(collider);
 	GET_SINGLE(CollisionManager)->AddCollider(collider);
-
-	if (DevScene* scene = dynamic_cast<DevScene*>(GET_SINGLE(SceneManager)->GetCurrentScene()))
-	{
-		scene->AddActor(bullet);
-	}
 }
 
 void Enemy_Normal::UpdateMovement(float deltaTime)

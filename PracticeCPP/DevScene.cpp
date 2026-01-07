@@ -21,6 +21,7 @@
 #include "EnemySpawner_TypeB.h"
 #include "HealthBarUI.h"
 #include "PowerUpItem.h"
+#include "BulletPool.h"
 
 DevScene::DevScene()
 {
@@ -29,6 +30,8 @@ DevScene::DevScene()
 
 DevScene::~DevScene()
 {
+	GET_SINGLE(BulletPool)->Clear();
+
 	for (const vector<Actor*>& actors : _actors)
 		for (Actor* actor : actors)
 			SAFE_DELETE(actor);
@@ -46,6 +49,8 @@ DevScene::~DevScene()
 
 void DevScene::Init()
 {
+	GET_SINGLE(BulletPool)->Init(500);
+
 	GET_SINGLE(CollisionManager)->SetCollisionLayer(LAYER_PLAYER, LAYER_BULLET, true);
 	GET_SINGLE(CollisionManager)->SetCollisionLayer(LAYER_ENEMY, LAYER_BULLET, true);
 	GET_SINGLE(CollisionManager)->SetCollisionLayer(LAYER_PLAYER, LAYER_ITEM, true);
@@ -105,7 +110,8 @@ void DevScene::Init()
 			BoxCollider* collider = new BoxCollider();
 			collider->SetSize({ 185, 80 });
 			boss->AddComponent(collider);
-			GET_SINGLE(CollisionManager)->AddCollider(collider);
+			//GET_SINGLE(CollisionManager)->AddCollider(collider);
+			boss->SetCollider(collider);
 
 			Damagable* damagable = new Damagable();
 			damagable->SetStat({ 50,50,0 });
@@ -187,6 +193,8 @@ void DevScene::Update()
 		for (Actor* actor : actors)
 			actor->Tick();
 
+	GET_SINGLE(BulletPool)->TickAll();
+
 	GET_SINGLE(CollisionManager)->Update();
 
 	FlushPending();
@@ -206,6 +214,8 @@ void DevScene::Render(HDC hdc)
 	for (const vector<Actor*>& actors : _actors)
 		for (Actor* actor : actors)
 			actor->Render(hdc);
+
+	GET_SINGLE(BulletPool)->RenderAll(hdc);
 }
 
 void DevScene::AddActor(Actor* actor)

@@ -14,6 +14,9 @@ public:
 	Bullet* Acquire(Actor* owner, int damage);
 	void Release(Bullet* bullet);
 
+	void TickAll();
+	void RenderAll(HDC hdc);
+
 private:
 	vector<Bullet*> _pool;
 	vector<Bullet*> _activeList;

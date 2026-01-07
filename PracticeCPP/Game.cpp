@@ -77,8 +77,4 @@ void Game::Render()
 
 	OutputDebugStringA(std::format("SceneRender: {}ms, BitBlt: {}ms, Clear: {}ms\n",
 		sceneRender, blit, clear).c_str());
-
-	// Double Buffering
-	//::BitBlt(_hdc, 0, 0, _rect.right, _rect.bottom, _hdcBack, 0, 0, SRCCOPY); // 비트 블릿 : 고속 복사
-	//::PatBlt(_hdcBack, 0, 0, _rect.right, _rect.bottom, WHITENESS);
 }

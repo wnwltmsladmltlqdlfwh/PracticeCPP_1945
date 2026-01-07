@@ -21,11 +21,11 @@ Bullet::Bullet(Actor* shotOwner, int dmg)
 
 		if (_ownerLayer == LAYER_PLAYER)
 		{
-			_sprite = GET_SINGLE(ResourceManager)->GetSprite(L"Player_Bullet");
+			SetSprite(GET_SINGLE(ResourceManager)->GetSprite(L"Player_Bullet"));
 		}
 		else
 		{
-			_sprite = GET_SINGLE(ResourceManager)->GetSprite(L"Enemy_Bullet");
+			SetSprite(GET_SINGLE(ResourceManager)->GetSprite(L"Enemy_Bullet"));
 		}
 	}
 }
@@ -42,12 +42,13 @@ Bullet::~Bullet()
 void Bullet::BeginPlay()
 {
 	Super::BeginPlay();
-
-	SetSprite(_sprite);
 }
 
 void Bullet::Tick()
 {
+	if (!_active)
+		return;
+
 	Super::Tick();
 
 	float deltaTime = GET_SINGLE(TimeManager)->GetDeltaTime();
@@ -57,19 +58,25 @@ void Bullet::Tick()
 
 	if(_pos.x < 0 || _pos.x > 600 || _pos.y < 0 || _pos.y > 800)
 	{
-		//GET_SINGLE(BulletPool)->Release(this);
-		RemovedSelf();
+		GET_SINGLE(BulletPool)->Release(this);
+		//RemovedSelf();
 		return;
 	}
 }
 
 void Bullet::Render(HDC hdc)
 {
+	if (!_active)
+		return;
+
 	Super::Render(hdc);
 }
 
 void Bullet::OnComponentBeginOverlap(Collider* collider, Collider* other)
 {
+	if (!_active)
+		return;
+
 	Actor* otherActor = other->GetOwner();
 	if (otherActor == nullptr)
 		return;
@@ -84,8 +91,8 @@ void Bullet::OnComponentBeginOverlap(Collider* collider, Collider* other)
 	if (damagable)
 	{
 		damagable->Damaged(_damage);
-		//GET_SINGLE(BulletPool)->Release(this);
-		RemovedSelf();
+		GET_SINGLE(BulletPool)->Release(this);
+		//RemovedSelf();
 	}
 }
 
@@ -98,13 +105,30 @@ void Bullet::Reset(Actor* owner, int damage)
 {
 	_damage = damage;
 	_active = true;
+	_speed = 300.f;
+	_direction = { 0,-1 };
+
+	vector<Component*> collidersToRemove;
+	for (Component* comp : _components)
+	{
+		if (Collider* col = dynamic_cast<Collider*>(comp))
+		{
+			GET_SINGLE(CollisionManager)->RemoveCollider(col);
+			collidersToRemove.push_back(comp);
+		}
+	}
+	for (Component* comp : collidersToRemove)
+	{
+		RemoveComponent(comp);
+		delete comp;
+	}
 
 	if (owner)
 	{
 		_ownerLayer = owner->GetLayer();
 		if (_ownerLayer == LAYER_PLAYER)
-			_sprite = GET_SINGLE(ResourceManager)->GetSprite(L"Player_Bullet");
+			SetSprite(GET_SINGLE(ResourceManager)->GetSprite(L"Player_Bullet"));
 		else
-			_sprite = GET_SINGLE(ResourceManager)->GetSprite(L"Enemy_Bullet");
+			SetSprite(GET_SINGLE(ResourceManager)->GetSprite(L"Enemy_Bullet"));
 	}
 }

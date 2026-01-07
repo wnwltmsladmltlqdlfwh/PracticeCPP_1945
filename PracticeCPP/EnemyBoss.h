@@ -3,6 +3,7 @@
 
 class Sprite;
 class Collider;
+class BoxCollider;
 
 enum class BossState
 {
@@ -33,8 +34,8 @@ public:
 	virtual void OnComponentEndOverlap(Collider* collider, Collider* other) override;
 
 	void SetTargetPos(Vec2 pos) { _targetPos = pos; }
-
     void SetFinalPos(Vec2 pos) { _finalPos = pos; }
+    void SetCollider(BoxCollider* collider) { _collider = collider; }
 
 private:
     void UpdateState(float deltaTime);
@@ -80,5 +81,7 @@ private:
 
     Vec2 _targetPos = { 300, 650 };
     int _damage = 5;
+
+    BoxCollider* _collider = nullptr;
 };
 

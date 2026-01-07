@@ -30,7 +30,6 @@ public:
 
 private:
 	LAYER_TYPE _ownerLayer = LAYER_OBJECT;
-	Sprite* _sprite = nullptr;
 	int _damage = 0;
 	Vec2 _direction = { 0, -1 };	// 기본 : 위로 (플레이어용)
 	float _speed = 300.f;

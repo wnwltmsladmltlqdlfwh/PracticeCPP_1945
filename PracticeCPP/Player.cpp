@@ -11,6 +11,7 @@
 #include "DevScene.h"
 #include "BoxCollider.h"
 #include "Damagable.h"
+#include "BulletPool.h"
 
 Player::Player()
 {
@@ -49,10 +50,9 @@ void Player::Tick()
 		Scene* scene = GET_SINGLE(SceneManager)->GetCurrentScene();
 		if (DevScene* devScene = dynamic_cast<DevScene*>(scene))
 		{
-			// 총알 개수만큼 발사
 			for (int i = 0; i < _bulletCount; i++)
 			{
-				Bullet* bullet = new Bullet(this, _bulletDamage);
+				Bullet* bullet = GET_SINGLE(BulletPool)->Acquire(this, _bulletDamage);
 
 				float offsetX = 0.f;
 				if (_bulletCount > 1)
@@ -65,7 +65,6 @@ void Player::Tick()
 				bullet->SetPos(_pos + Vec2{ offsetX, -30.f });
 				bullet->SetBulletDamage(10);
 				bullet->SetLayer(LAYER_BULLET);
-				devScene->AddActor(bullet);
 
 				BoxCollider* collider = new BoxCollider();
 				collider->SetSize({ 6, 20 });

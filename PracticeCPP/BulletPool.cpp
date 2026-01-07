@@ -14,7 +14,7 @@ void BulletPool::Init(int poolSize)
     for (int i = 0; i < poolSize; i++)
     {
         Bullet* bullet = new Bullet(nullptr, 0);
-        bullet->SetActive(false);  // 비활성화 상태로 생성
+        bullet->SetActive(false);
         _pool.push_back(bullet);
     }
 }
@@ -41,11 +41,10 @@ Bullet* BulletPool::Acquire(Actor* owner, int damage)
     }
     else
     {
-        // 풀이 비었으면 새로 생성
         bullet = new Bullet(nullptr, 0);
     }
 
-    bullet->Reset(owner, damage);  // 초기화
+    bullet->Reset(owner, damage);
     bullet->SetActive(true);
     _activeList.push_back(bullet);
 
@@ -59,10 +58,28 @@ void BulletPool::Release(Bullet* bullet)
 
     bullet->SetActive(false);
 
-    // activeList에서 제거
     auto it = std::find(_activeList.begin(), _activeList.end(), bullet);
     if (it != _activeList.end())
         _activeList.erase(it);
 
     _pool.push_back(bullet);
+}
+
+void BulletPool::TickAll()
+{
+    vector<Bullet*> copyList = _activeList;
+    for (Bullet* bullet : copyList)
+    {
+        if (bullet && bullet->IsActive())
+            bullet->Tick();
+    }
+}
+
+void BulletPool::RenderAll(HDC hdc)
+{
+    for (Bullet* bullet : _activeList)
+    {
+        if (bullet && bullet->IsActive())
+            bullet->Render(hdc);
+    }
 }

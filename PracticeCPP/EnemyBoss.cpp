@@ -7,6 +7,8 @@
 #include "DevScene.h"
 #include "Bullet.h"
 #include "SphereCollider.h"
+#include "BulletPool.h"
+#include "BoxCollider.h"
 
 EnemyBoss::EnemyBoss()
 {
@@ -84,6 +86,10 @@ void EnemyBoss::UpdateEntering(float deltaTime)
 		_state = BossState::Active;
 		_currentPattern = BossPattern::Radial;
 		_patternTimer = 0.f;
+		if (_collider)
+		{
+			GET_SINGLE(CollisionManager)->AddCollider(_collider);
+		}
 	}
 	else
 	{
@@ -179,7 +185,8 @@ void EnemyBoss::ShootAtTarget(Vec2 from)
 
 void EnemyBoss::SpawnBullet(Vec2 pos, Vec2 dir)
 {
-	Bullet* bullet = new Bullet(this, _damage);
+	Bullet* bullet = GET_SINGLE(BulletPool)->Acquire(this, _damage);
+
 	bullet->SetPos(pos);
 	bullet->SetDirection(dir);
 	bullet->SetSpeed(250.f);
@@ -189,11 +196,6 @@ void EnemyBoss::SpawnBullet(Vec2 pos, Vec2 dir)
 	collider->SetRadius(6.f);
 	bullet->AddComponent(collider);
 	GET_SINGLE(CollisionManager)->AddCollider(collider);
-
-	if (DevScene* scene = dynamic_cast<DevScene*>(GET_SINGLE(SceneManager)->GetCurrentScene()))
-	{
-		scene->AddActor(bullet);
-	}
 }
 
 void EnemyBoss::Render(HDC hdc)
